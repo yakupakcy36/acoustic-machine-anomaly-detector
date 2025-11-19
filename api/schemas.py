@@ -9,6 +9,10 @@ class AcousticSimulationRequest(BaseModel):
     seed: int = Field(default=42, ge=0)
 
 
+class RawAudioAnalysisRequest(BaseModel):
+    audio_samples: list[float] = Field(..., min_length=64, description="Raw 1D float audio time-series samples")
+
+
 class AcousticAnalysisResponse(BaseModel):
     is_anomaly: bool
     anomaly_score: float

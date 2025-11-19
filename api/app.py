@@ -9,6 +9,7 @@ from src.generator import generate_machine_audio
 from src.model import train_acoustic_detector, AcousticAnomalyDetectorBundle
 from api.schemas import (
     AcousticSimulationRequest,
+    RawAudioAnalysisRequest,
     AcousticAnalysisResponse,
     HealthResponse,
 )
@@ -65,5 +66,17 @@ def analyze_synthetic_sound(req: AcousticSimulationRequest):
         seed=req.seed,
         config=DEFAULT_AUDIO_CONFIG,
     )
+    res = bundle.predict_audio(audio)
+    return AcousticAnalysisResponse(**res.__dict__)
+
+
+@app.post("/analyze/audio", response_model=AcousticAnalysisResponse, tags=["Acoustic Analysis"])
+def analyze_raw_audio(req: RawAudioAnalysisRequest):
+    """Evaluates raw acoustic audio waveform array directly for anomaly reconstruction error."""
+    if bundle is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Acoustic detector unavailable")
+
+    import numpy as np
+    audio = np.array(req.audio_samples, dtype=np.float32)
     res = bundle.predict_audio(audio)
     return AcousticAnalysisResponse(**res.__dict__)

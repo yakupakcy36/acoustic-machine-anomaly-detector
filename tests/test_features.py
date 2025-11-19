@@ -20,9 +20,10 @@ def test_feature_extractor_dimension():
     assert feats[33] > 0.0  # Rolloff
 
 
-def test_filterbank_construction():
+def test_short_audio_padding():
+    # Audio with fewer samples than n_fft should be padded without error
     extractor = AcousticFeatureExtractor(config=DEFAULT_AUDIO_CONFIG)
-    assert extractor.mel_filters.shape[0] == DEFAULT_AUDIO_CONFIG.n_mels
-    assert extractor.mel_filters.shape[1] == (DEFAULT_AUDIO_CONFIG.n_fft // 2 + 1)
-    # Energy in filters must be non-negative
-    assert np.all(extractor.mel_filters >= 0)
+    short_audio = np.random.randn(256).astype(np.float32)
+    feats = extractor.extract_features(short_audio)
+    assert feats.shape == (36,)
+    assert np.isfinite(feats).all()

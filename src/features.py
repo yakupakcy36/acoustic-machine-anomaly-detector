@@ -54,6 +54,11 @@ class AcousticFeatureExtractor:
         - RMS Energy
         - Zero-Crossing Rate (ZCR)
         """
+        # Ensure audio has at least n_fft samples by zero-padding if necessary
+        if len(audio) < self.config.n_fft:
+            pad_width = self.config.n_fft - len(audio)
+            audio = np.pad(audio, (0, pad_width), mode="constant")
+
         # 1. Framing & STFT
         hop = self.config.hop_length
         n_fft = self.config.n_fft

@@ -47,3 +47,15 @@ def test_analyze_synthetic_anomaly(client):
     assert data["is_anomaly"] is True
     assert data["health_status"] in ["WARNING", "CRITICAL"]
     assert data["anomaly_score"] >= data["threshold"]
+
+
+def test_analyze_raw_audio_endpoint(client):
+    payload = {
+        "audio_samples": [0.01 * (i % 10) for i in range(500)]
+    }
+    response = client.post("/analyze/audio", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "is_anomaly" in data
+    assert "anomaly_score" in data
+    assert data["health_status"] in ["NORMAL", "WARNING", "CRITICAL"]
